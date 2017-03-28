@@ -111,15 +111,19 @@ mkdir -p "$RUNNER_LOG_DIR"
 # Use $CWD/sys.config if exists, otherwise releases/VSN/sys.config
 if [ -z "$NAME_ARG" ]; then
     NODENAME=`egrep '^[ \t]*nodename[ \t]*=[ \t]*' $RUNNER_ETC_DIR/$CUTTLEFISH_CONF.new 2> /dev/null | tail -n 1 | cut -d = -f 2`
-    if [ -z "$NODENAME" ]; then
-        echo "vm.args needs to have a -name parameter."
-        echo "  -sname is not supported."
+    SNODENAME=`egrep '^[ \t]*shortname[ \t]*=[ \t]*' $RUNNER_ETC_DIR/$CUTTLEFISH_CONF.new 2> /dev/null | tail -n 1 | cut -d = -f 2`
+
+    if [ -n "$NODENAME" ]; then
+        NAME_TYPE="-name"
+        NAME="${NODENAME# *}"
+    elif [ -n "$SNODENAME" ]; then
+        NAME_TYPE="-sname"
+        NAME="${SNODENAME# *}"
+    else
+        echo "vm.args needs to have a -name or -sname parameter."
         echo "  couldn't find 'nodename' in $RUNNER_ETC_DIR/$CUTTLEFISH_CONF.new"
         echo "  \$PWD is $PWD"
         exit 1
-    else
-        NAME_TYPE="-name"
-        NAME="${NODENAME# *}"
     fi
 fi
 
